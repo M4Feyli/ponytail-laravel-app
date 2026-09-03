@@ -31,7 +31,13 @@ fi
 # reach frankenphp_handle_request() (no PHP error, just silent failure).
 # Override with OCTANE_WORKERS if a plan has room for more.
 #
+# octane:frankenphp (not octane:start --server=frankenphp) — Laravel's own
+# docs and multiple real deployments use this form; octane:start's generic
+# multi-server path wraps FrankenPHP in a way that's been reported to not
+# always set FRANKENPHP_WORKER correctly, which is exactly our symptom
+# ("worker ... has not reached frankenphp_handle_request()").
+#
 # Fly.io: fixed port, matches fly.toml's internal_port (8080), no PORT env set.
 # Render.com and most other Docker PaaS: PORT is injected at runtime and
 # changes between deploys, so it has to be read here, not baked into CMD.
-exec php artisan octane:start --server=frankenphp --host=0.0.0.0 --port="${PORT:-8080}" --workers="${OCTANE_WORKERS:-2}" --max-requests=500
+exec php artisan octane:frankenphp --host=0.0.0.0 --port="${PORT:-8080}" --workers="${OCTANE_WORKERS:-2}" --max-requests=500 --log-level=debug
