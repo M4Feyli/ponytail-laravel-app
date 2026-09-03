@@ -61,6 +61,15 @@ RUN { \
         echo 'display_errors = On'; \
         echo 'log_errors = On'; \
         echo 'error_log = /dev/stderr'; \
+        # Laravel's own Octane docs pass this explicitly for FrankenPHP —
+        # PHP's shipped php.ini-production drops "E" (environment) from
+        # variables_order, so $_SERVER never gets populated from env vars.
+        # FrankenPHP signals worker mode by setting FRANKENPHP_WORKER as an
+        # env var, which the worker script reads via $_SERVER — without E
+        # here it would never see it and would hit the same "must be in
+        # worker mode" guard we're chasing, silently, since it's a plain
+        # echo+exit(1), not a PHP error.
+        echo 'variables_order = "EGPCS"'; \
     } > /usr/local/etc/php/conf.d/zz-app-error-logging.ini
 
 WORKDIR /app
