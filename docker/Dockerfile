@@ -79,7 +79,14 @@ RUN php artisan storage:link \
 
 ENV OCTANE_SERVER=frankenphp \
     APP_ENV=production \
-    APP_DEBUG=false
+    APP_DEBUG=false \
+    # Caddy (which FrankenPHP embeds) defaults to $HOME/.config and
+    # $HOME/.local/share for its own config/data storage. www-data has no
+    # real home in this image, so without this it silently can't write
+    # anywhere — which is very likely why the FrankenPHP app module fails
+    # to start at all. Point it at the dirs we already created and chowned.
+    XDG_CONFIG_HOME=/config \
+    XDG_DATA_HOME=/data
 
 # 8080 is the default when no PORT env var is injected (Fly.io). Render.com
 # and similar platforms set PORT themselves; entrypoint.sh reads it at
