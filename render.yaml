@@ -32,8 +32,15 @@ services:
       # docker/entrypoint.sh for the full explanation.
       - key: FRANKENPHP_CLASSIC_MODE
         value: "true"
+      # generateValue produces a generic random string, not Laravel's
+      # required "base64:<32 random bytes>" format -- the app's Encrypter
+      # (used for session/cookie encryption) rejects it with "Unsupported
+      # cipher or incorrect key length", which crashes every request that
+      # touches sessions (i.e. everything except the plain /up healthcheck).
+      # Generated locally with:
+      #   php -r "echo 'base64:'.base64_encode(random_bytes(32));"
       - key: APP_KEY
-        generateValue: true
+        value: base64:34MLzZuEuwo+wqPVE4GenWASBwAYXAFnXRI/cHrfmGY=
       - key: RUN_MIGRATIONS
         value: "true"
       - key: SESSION_DRIVER
