@@ -24,10 +24,38 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
 fi
 
-# ---- diagnostics: the worker has been failing to start with zero PHP
-# output through several fixes. Render has no free shell access, so print
-# what we'd otherwise check by hand — this all runs whether or not Octane
-# ends up working, and costs nothing.
+# Two ways to serve, chosen by FRANKENPHP_CLASSIC_MODE:
+#
+# Worker mode (default, Octane) boots Laravel once and keeps it resident in
+# memory between requests — fast, but FrankenPHP's worker supervisor only
+# gives the boot a handful of retries with a short exponential backoff
+# before giving up permanently ("too many consecutive failures"). On
+# Render's free tier, GOMAXPROCS is throttled down to 1 (confirmed via
+# platform logs — "using minimum allowed GOMAXPROCS" vs. 16 locally), which
+# starves that boot of enough real CPU time inside the retry budget even
+# though the exact same image boots and serves fine locally with full CPU.
+# We proved this by running the identical production image locally: it
+# started and served correctly, so the crash is a Render-CPU-throttling
+# artifact, not a bug in the image.
+#
+# Classic mode (frankenphp php-server) has no such gate: it boots PHP fresh
+# per request, like traditional php-fpm, so there's nothing to time out
+# during startup. Slower per request, but completely insensitive to this
+# specific CPU-throttling failure. Set FRANKENPHP_CLASSIC_MODE=true (done
+# in render.yaml) to use it. --root public/ replicates Octane/Laravel's own
+# documented Caddyfile block ("root public/; php_server") — static assets
+# are served directly, everything else falls through to public/index.php.
+if [ "$FRANKENPHP_CLASSIC_MODE" = "true" ]; then
+    echo "entrypoint: FRANKENPHP_CLASSIC_MODE=true -- serving via 'frankenphp php-server' (no Octane worker)" >&2
+    id >&2 || true
+    frankenphp version >&2 || true
+    exec frankenphp php-server --listen "0.0.0.0:${PORT:-8080}" --root public/
+fi
+
+# ---- diagnostics: only relevant to the worker-mode path below, which has
+# been failing to start with zero PHP output through several fixes. Render
+# has no free shell access, so print what we'd otherwise check by hand —
+# this runs whether or not the worker ends up booting, and costs nothing.
 echo "=== DIAGNOSTICS ===" >&2
 echo "--- id ---" >&2
 id >&2 || true

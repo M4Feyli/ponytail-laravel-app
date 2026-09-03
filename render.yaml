@@ -24,6 +24,14 @@ services:
         value: stderr
       - key: OCTANE_SERVER
         value: frankenphp
+      # Render's free tier throttles CPU hard enough (GOMAXPROCS=1) that
+      # Octane's worker-mode boot can't finish inside FrankenPHP's startup
+      # retry budget, so the app never comes up ("too many consecutive
+      # failures"). Classic (non-worker) mode boots PHP fresh per request
+      # like php-fpm, sidestepping that startup gate entirely. See
+      # docker/entrypoint.sh for the full explanation.
+      - key: FRANKENPHP_CLASSIC_MODE
+        value: "true"
       - key: APP_KEY
         generateValue: true
       - key: RUN_MIGRATIONS
