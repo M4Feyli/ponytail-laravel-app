@@ -51,6 +51,18 @@ RUN install-php-extensions \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false libcap2-bin \
     && rm -rf /var/lib/apt/lists/*
 
+# FrankenPHP's worker is currently dying before it reaches
+# frankenphp_handle_request() with no visible reason in the platform log —
+# that almost always means a PHP fatal error is happening but going to a
+# sink the log stream isn't capturing (production php.ini defaults to
+# display_errors=Off, and error_log isn't pinned to stderr). Force both
+# so the *next* crash actually tells us what broke.
+RUN { \
+        echo 'display_errors = On'; \
+        echo 'log_errors = On'; \
+        echo 'error_log = /dev/stderr'; \
+    } > /usr/local/etc/php/conf.d/zz-app-error-logging.ini
+
 WORKDIR /app
 
 COPY --from=vendor /app /app
