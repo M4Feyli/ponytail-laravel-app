@@ -51,14 +51,22 @@ RUN install-php-extensions \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false libcap2-bin \
     && rm -rf /var/lib/apt/lists/*
 
-# FrankenPHP's worker is currently dying before it reaches
-# frankenphp_handle_request() with no visible reason in the platform log —
-# that almost always means a PHP fatal error is happening but going to a
-# sink the log stream isn't capturing (production php.ini defaults to
-# display_errors=Off, and error_log isn't pinned to stderr). Force both
-# so the *next* crash actually tells us what broke.
+# log_errors + error_log=/dev/stderr get every PHP error into the platform
+# log, which is what we actually need in production.
+#
+# display_errors must stay Off here, unlike a traditional php-fpm/Apache
+# setup: FrankenPHP's classic php-server mode writes PHP's own stdout
+# straight into the current HTTP response stream, so display_errors=On
+# means any warning gets printed into the response body *before* Laravel's
+# kernel calls $response->send(). That premature output makes the real
+# sendHeaders() call fail with "headers already sent", which Laravel then
+# converts into an ErrorException and tries to render/send *again* on the
+# same already-sent response — a fatal cascade on every request that hits
+# so much as a single notice. (We had this On temporarily to debug the
+# worker-boot crash; the warning that started it all never showed up in
+# logs because it went into the corrupted response body, not stderr.)
 RUN { \
-        echo 'display_errors = On'; \
+        echo 'display_errors = Off'; \
         echo 'log_errors = On'; \
         echo 'error_log = /dev/stderr'; \
         # Laravel's own Octane docs pass this explicitly for FrankenPHP —
