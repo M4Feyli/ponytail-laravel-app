@@ -40,7 +40,15 @@ RUN install-php-extensions \
         zip \
         intl \
         opcache \
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    # FrankenPHP ships with Linux capabilities (setcap) on its binary so it
+    # can bind privileged ports as non-root. Sandboxed platforms like
+    # Render.com refuse to exec a binary carrying capabilities at all,
+    # which surfaces as "operation not permitted" with no other detail —
+    # strip them since we never bind a privileged port anyway.
+    && apt-get update \
+    && apt-get install -y --no-install-recommends libcap2-bin \
+    && setcap -r /usr/local/bin/frankenphp \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false libcap2-bin \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -49,7 +57,8 @@ COPY --from=vendor /app /app
 COPY --from=frontend /app/public/build public/build/
 
 RUN php artisan storage:link \
-    && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && mkdir -p /config/caddy /data/caddy \
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache /config/caddy /data/caddy \
     && chmod +x docker/entrypoint.sh
 
 ENV OCTANE_SERVER=frankenphp \
@@ -60,5 +69,9 @@ ENV OCTANE_SERVER=frankenphp \
 # and similar platforms set PORT themselves; entrypoint.sh reads it at
 # runtime, so nothing here needs to change between platforms.
 EXPOSE 8080
+
+# Run as non-root: matches the capabilities stripped above and is what
+# sandboxed platforms (Render) expect anyway.
+USER www-data
 
 ENTRYPOINT ["docker/entrypoint.sh"]
