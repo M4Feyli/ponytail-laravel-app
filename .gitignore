@@ -23,3 +23,7 @@ yarn-error.log
 /.vscode
 /.zed
 /.ddev
+
+# local sqlite databases (never commit test/dev data)
+*.sqlite
+/laravel

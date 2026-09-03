@@ -49,7 +49,8 @@ COPY --from=vendor /app /app
 COPY --from=frontend /app/public/build public/build/
 
 RUN php artisan storage:link \
-    && chown -R www-data:www-data /app/storage /app/bootstrap/cache
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod +x docker/entrypoint.sh
 
 ENV OCTANE_SERVER=frankenphp \
     APP_ENV=production \
