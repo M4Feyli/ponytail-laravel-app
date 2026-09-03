@@ -57,8 +57,12 @@ COPY --from=vendor /app /app
 COPY --from=frontend /app/public/build public/build/
 
 RUN php artisan storage:link \
+    # Pre-install the FrankenPHP worker script at build time (as root) —
+    # Octane otherwise copies it into public/ on first boot (only if
+    # missing), which fails once the container runs as non-root below.
+    && cp vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php public/frankenphp-worker.php \
     && mkdir -p /config/caddy /data/caddy \
-    && chown -R www-data:www-data /app/storage /app/bootstrap/cache /config/caddy /data/caddy \
+    && chown -R www-data:www-data /app /config/caddy /data/caddy \
     && chmod +x docker/entrypoint.sh
 
 ENV OCTANE_SERVER=frankenphp \
