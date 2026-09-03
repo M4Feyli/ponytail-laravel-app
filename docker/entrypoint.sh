@@ -24,7 +24,14 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
 fi
 
+# "auto" sizes workers off the container's reported CPU count, which in a
+# cgroup-limited free-tier instance is often the *host's* core count, not
+# what's actually allotted — spawning far more Laravel-booting processes
+# than the memory budget survives, which OOM-kills them before they ever
+# reach frankenphp_handle_request() (no PHP error, just silent failure).
+# Override with OCTANE_WORKERS if a plan has room for more.
+#
 # Fly.io: fixed port, matches fly.toml's internal_port (8080), no PORT env set.
 # Render.com and most other Docker PaaS: PORT is injected at runtime and
 # changes between deploys, so it has to be read here, not baked into CMD.
-exec php artisan octane:start --server=frankenphp --host=0.0.0.0 --port="${PORT:-8080}" --workers=auto --max-requests=500
+exec php artisan octane:start --server=frankenphp --host=0.0.0.0 --port="${PORT:-8080}" --workers="${OCTANE_WORKERS:-2}" --max-requests=500
