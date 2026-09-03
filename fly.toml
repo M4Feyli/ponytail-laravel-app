@@ -1,0 +1,57 @@
+# fly.toml — generated for this project, review before first deploy.
+# Docs: https://fly.io/docs/reference/configuration/
+#
+# app name must be globally unique on Fly.io — change it before `fly launch`.
+app = "ponytail-laravel-app"
+primary_region = "arn"  # Stockholm. Swap for whichever region is closest to you.
+
+[build]
+  dockerfile = "docker/Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  LOG_CHANNEL = "stderr"
+  OCTANE_SERVER = "frankenphp"
+  DB_CONNECTION = "pgsql"
+  SESSION_DRIVER = "database"
+  CACHE_STORE = "database"
+  QUEUE_CONNECTION = "database"
+  # RUN_MIGRATIONS is intentionally left unset here — migrations run via
+  # release_command below, once per deploy, not on every machine boot.
+
+# Runs once per deploy, before new machines take traffic. This is where
+# migrations belong for a multi-machine app (never in the container's own
+# startup — that would run once per machine, concurrently).
+[deploy]
+  release_command = "php artisan migrate --force"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/up"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# Persistent storage for anything written to storage/app (uploads, etc).
+# Comment this out (and the matching env var) if you only ever write to S3.
+[mounts]
+  source = "ponytail_storage"
+  destination = "/app/storage/app"

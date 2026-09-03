@@ -1,0 +1,64 @@
+# Render.com Blueprint — free tier, no credit card required.
+# Deploy: push this repo to GitHub, then in the Render dashboard choose
+# "New > Blueprint" and point it at the repo. Render reads this file and
+# creates the web service + database together.
+#
+# Free-tier notes: the web service sleeps after 15 minutes idle (30-50s
+# cold start on the next request) and the free Postgres database expires
+# 30 days after creation — fine for trying this out, not for anything
+# that needs to stay up or keep data long-term.
+services:
+  - type: web
+    name: ponytail-laravel-app
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: OCTANE_SERVER
+        value: frankenphp
+      - key: APP_KEY
+        generateValue: true
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: ponytail-laravel-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ponytail-laravel-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: ponytail-laravel-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ponytail-laravel-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ponytail-laravel-db
+          property: password
+
+databases:
+  - name: ponytail-laravel-db
+    plan: free
+    databaseName: ponytail
+    user: ponytail
