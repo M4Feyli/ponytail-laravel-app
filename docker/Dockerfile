@@ -3,7 +3,9 @@
 # own HTTP server, which is the whole point of running Octane on it.
 
 # ---- Stage 1: PHP dependencies -------------------------------------------
-FROM composer:2 AS vendor
+FROM php:8.4-cli AS vendor
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # composer.lock* (glob) so the build still works before the first `composer
 # install` has ever generated one — see README "run composer install first".
