@@ -9,7 +9,7 @@
 # that needs to stay up or keep data long-term.
 services:
   - type: web
-    name: ponytail-laravel-app
+    name: nsvo
     runtime: docker
     dockerfilePath: ./docker/Dockerfile
     dockerContext: .
