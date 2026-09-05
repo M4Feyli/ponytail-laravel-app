@@ -50,6 +50,12 @@ services:
         value: https://ponytail-laravel-app.onrender.com
       - key: RUN_MIGRATIONS
         value: "true"
+      - key: RUN_SEEDS
+        value: "true"
+      - key: ADMIN_NAME
+        value: Admin1010
+      - key: ADMIN_EMAIL
+        value: admin@example.com
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE

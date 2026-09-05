@@ -24,6 +24,13 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
 fi
 
+if [ "$RUN_SEEDS" = "true" ]; then
+    echo "entrypoint: RUN_SEEDS=true -- running seeders" >&2
+    php artisan db:seed --class=AdminUserSeeder --force
+    php artisan db:seed --class=CategorySeeder --force
+    php artisan db:seed --class=MockupProductSeeder --force
+fi
+
 # Two ways to serve, chosen by FRANKENPHP_CLASSIC_MODE:
 #
 # Worker mode (default, Octane) boots Laravel once and keeps it resident in
