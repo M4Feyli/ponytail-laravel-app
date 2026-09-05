@@ -27,3 +27,4 @@ yarn-error.log
 # local sqlite databases (never commit test/dev data)
 *.sqlite
 /laravel
+.claude/

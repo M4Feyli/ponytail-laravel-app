@@ -41,6 +41,13 @@ services:
       #   php -r "echo 'base64:'.base64_encode(random_bytes(32));"
       - key: APP_KEY
         value: base64:34MLzZuEuwo+wqPVE4GenWASBwAYXAFnXRI/cHrfmGY=
+      # Storage::url() (used for every product/category image) bakes this
+      # into the generated URL at config-cache time -- it does NOT fall
+      # back to the live request host like route()/asset() do. Must match
+      # the service's actual Render URL exactly (check the dashboard's
+      # "..onrender.com" address under Settings -> the top of the page).
+      - key: APP_URL
+        value: https://ponytail-laravel-app.onrender.com
       - key: RUN_MIGRATIONS
         value: "true"
       - key: SESSION_DRIVER

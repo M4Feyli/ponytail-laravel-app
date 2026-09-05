@@ -5,8 +5,8 @@
 FROM php:8.4-cli
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip libzip-dev libpng-dev libonig-dev default-mysql-client \
-    && docker-php-ext-install pdo_mysql zip pcntl \
+        git unzip libzip-dev libpng-dev libonig-dev libicu-dev default-mysql-client \
+    && docker-php-ext-install pdo_mysql zip pcntl intl \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
