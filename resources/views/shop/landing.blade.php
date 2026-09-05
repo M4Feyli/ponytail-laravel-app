@@ -3,18 +3,12 @@
 @section('content')
 <section class="landing">
   <div class="landing-hero">
-    <div class="k">FÖRHANDSGRANSKNING · LIVE</div>
     <h1>Utility <em>engineering.</em></h1>
-    <p>{{ $productCount }} noggrant utvalda begagnade plagg och accessoarer, skickbedömda innan de läggs upp. Välj en kategori nedan för att utforska sortimentet.</p>
-    <div class="landing-stats">
-      <div class="stat"><b>{{ $productCount }}</b><span>PRODUKTER</span></div>
-      <div class="stat"><b>{{ $categories->count() }}</b><span>KATEGORIER</span></div>
-    </div>
   </div>
 
   <div class="cat-grid">
     @forelse ($categories as $i => $cat)
-      <a class="cat-card" href="{{ route('shop.category', $cat) }}">
+      <a class="cat-card cat-card--{{ $i }}" href="{{ route('shop.category', $cat) }}">
         <div class="cat-bg">
           @if ($cat->imageUrl())
             <img src="{{ $cat->imageUrl() }}" alt="{{ $cat->name }}" loading="lazy">

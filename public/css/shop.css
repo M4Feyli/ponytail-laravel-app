@@ -194,3 +194,18 @@ footer{border-top:1px solid var(--line);background:#000;padding:3rem 1.5rem 2rem
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty-cat{text-align:center;padding:5rem 1rem;color:var(--mut);font:500 13px var(--mono);letter-spacing:.14em;text-transform:uppercase;grid-column:1/-1}
 .empty-cat b{display:block;font-family:var(--display);font-size:3rem;color:var(--acid);letter-spacing:0;text-transform:uppercase;margin-bottom:1rem}
+
+/* Per-category gradient backgrounds (no images) */
+.cat-card--0{background:linear-gradient(140deg,#0a1628 0%,#0d1f35 100%)}
+.cat-card--1{background:linear-gradient(140deg,#0c1409 0%,#162108 100%)}
+.cat-card--2{background:linear-gradient(140deg,#1a0909 0%,#280d0d 100%)}
+.cat-card--3{background:linear-gradient(140deg,#0a0a1e 0%,#12122c 100%)}
+.cat-card--4{background:linear-gradient(140deg,#091209 0%,#0e1f0e 100%)}
+.cat-card--5{background:linear-gradient(140deg,#1a1208 0%,#261a08 100%)}
+.cat-card .cat-bg::before{content:"";position:absolute;bottom:-.1em;right:-.05em;font-family:var(--display);font-size:9rem;line-height:1;opacity:.07;z-index:0;pointer-events:none;text-transform:uppercase;letter-spacing:-.04em;color:#fff}
+.cat-card--0 .cat-bg::before{content:"JKT"}
+.cat-card--1 .cat-bg::before{content:"KPS"}
+.cat-card--2 .cat-bg::before{content:"SKO"}
+.cat-card--3 .cat-bg::before{content:"TRJ"}
+.cat-card--4 .cat-bg::before{content:"VSK"}
+.cat-card--5 .cat-bg::before{content:"BLT"}
